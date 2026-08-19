@@ -9,14 +9,14 @@
   "characters": [
     { "id": "andrew", "name": "Diwakar Badiger", "role": "AI Product Manager", "avatarUrl": "/avatars/diwakar.jpg" },
     { "id": "jane", "name": "Anagha", "role": "Principal Product Manager" },
-    { "id": "ingrid", "name": "Ingrid", "role": "Marketing specialist" }
+    { "id": "ingrid", "name": "Noble", "role": "Marketing specialist" }
   ],
   "lesson": {
     "id": "find-your-pm-blind-spots",
     "title": "Find Your PM Blind Spots",
     "note": "Blocks are ordered. type=message/artifact/tool/question/continue/feedback. Options carry weight (1 full, 0.5 partial, 0 wrong) and a feedbackId. Highlight keywords with **bold** or a highlight span in rendering. This seed reproduces the first 5 verified tasks; later tasks (API, unit economics, A/B, interviews, LLM) follow the same shell and should be authored similarly.",
     "blocks": [
-      { "type": "message", "character": "andrew", "markdown": "Hello! I am one of the authors of the ProductDo simulators. The PM profession requires several skills at once: OKRs, SQL, analytics, user interviews, API testing, A/B testing, unit economics, and LLMs. We've prepared 20+ practice tasks. You'll work with real tools like SQL, Mixpanel, APIs, and Replit AI. ~30 min. A 10% coupon awaits at the end." },
+      { "type": "message", "character": "andrew", "markdown": "Hello! I'm here to guide you through this simulator. The PM profession requires several skills at once: OKRs, SQL, analytics, user interviews, API testing, A/B testing, unit economics, and LLMs. We've prepared 20+ practice tasks. You'll work with real tools like SQL, Mixpanel, APIs, and Replit AI. ~30 min. A 10% coupon awaits at the end." },
       { "type": "continue", "label": "Sounds good!" },
 
       { "type": "message", "character": "jane", "markdown": "Hi! I'm your senior colleague. Our product is a clothing rental service by subscription. We have quarterly planning today and haven't defined OKRs yet. What do you think of this Q2 draft?" },
