@@ -21,8 +21,8 @@ export function QuestionBlock({
   const isAnswered = !!answer;
 
   return (
-    <div className="ml-[52px]">
-      {block.prompt && <Prose text={block.prompt} className="mb-3 text-foreground/90" />}
+    <div className="ml-[50px] sm:ml-[56px] animate-rise-in">
+      {block.prompt && <Prose text={block.prompt} className="mb-3 text-[15px] text-foreground/90" />}
       <fieldset className="space-y-2" disabled={isAnswered}>
         <legend className="sr-only">{block.prompt ?? "Choose an answer"}</legend>
         {block.options.map((opt) => {
@@ -32,32 +32,52 @@ export function QuestionBlock({
             <label
               key={opt.id}
               className={clsx(
-                "flex items-center gap-3 rounded-md border-l-4 bg-surface px-4 py-3 cursor-pointer transition-colors",
-                !isAnswered && "border-border hover:border-l-accent-dim",
-                !isAnswered && isSelected && "border-l-accent-dim ring-1 ring-accent-dim",
-                isAnswered && !isSelected && "border-border opacity-60 cursor-default",
-                verdict === "correct" && "border-l-accent",
-                verdict === "partial" && "border-l-accent",
-                verdict === "wrong" && "border-l-danger"
+                "flex min-h-[44px] items-center gap-3 rounded-2xl bg-surface px-4 py-3 transition-all",
+                !isAnswered && "cursor-pointer hover:bg-surface-2 active:scale-[0.99]",
+                !isAnswered && isSelected && "ring-2 ring-accent bg-surface-2",
+                isAnswered && !isSelected && "opacity-45",
+                verdict === "correct" && "ring-2 ring-accent bg-accent-soft opacity-100",
+                verdict === "partial" && "ring-2 ring-accent bg-accent-soft opacity-100",
+                verdict === "wrong" && "ring-2 ring-danger bg-danger-soft opacity-100"
               )}
             >
+              <span
+                className={clsx(
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                  !isAnswered && !isSelected && "border-border-strong",
+                  !isAnswered && isSelected && "border-accent bg-accent",
+                  verdict === "correct" && "border-accent bg-accent",
+                  verdict === "partial" && "border-accent bg-accent",
+                  verdict === "wrong" && "border-danger bg-danger"
+                )}
+              >
+                {(isSelected || verdict) && (
+                  <svg viewBox="0 0 12 12" className="h-3 w-3 fill-none stroke-white stroke-[2.2]">
+                    {verdict === "wrong" ? (
+                      <path d="M3 3l6 6M9 3l-6 6" strokeLinecap="round" />
+                    ) : (
+                      <path d="M2.5 6.2l2.3 2.3L9.5 3.5" strokeLinecap="round" strokeLinejoin="round" />
+                    )}
+                  </svg>
+                )}
+              </span>
               <input
                 type="radio"
                 name={block.id}
                 value={opt.id}
                 checked={isSelected}
                 onChange={() => !isAnswered && onSelect(opt.id)}
-                className="accent-[var(--accent)]"
+                className="sr-only"
               />
-              <span className="flex-1 text-sm">{opt.label}</span>
+              <span className="flex-1 text-[14px] sm:text-[15px] leading-snug">{opt.label}</span>
               {verdict === "correct" && (
-                <span className="text-xs font-semibold text-accent">✓ Correct</span>
+                <span className="shrink-0 text-[11px] font-semibold text-accent">Correct</span>
               )}
               {verdict === "partial" && (
-                <span className="text-xs font-semibold text-accent">≈ Partial credit</span>
+                <span className="shrink-0 text-[11px] font-semibold text-accent">Partial</span>
               )}
               {verdict === "wrong" && (
-                <span className="text-xs font-semibold text-danger">✕ Not quite</span>
+                <span className="shrink-0 text-[11px] font-semibold text-danger">Wrong</span>
               )}
             </label>
           );
@@ -69,10 +89,10 @@ export function QuestionBlock({
           onClick={onSubmit}
           disabled={!selectedId}
           className={clsx(
-            "mt-3 rounded-full px-5 py-2 text-sm font-semibold transition-colors",
+            "mt-3 min-h-11 rounded-full px-6 py-2.5 text-[15px] font-semibold transition-all active:scale-95",
             selectedId
-              ? "bg-accent text-accent-foreground hover:bg-accent-dim"
-              : "bg-surface-2 text-muted cursor-not-allowed"
+              ? "bg-accent text-accent-foreground hover:brightness-110"
+              : "bg-surface-2 text-muted-2 cursor-not-allowed"
           )}
         >
           {block.sendLabel}

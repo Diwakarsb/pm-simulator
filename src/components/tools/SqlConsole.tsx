@@ -56,39 +56,39 @@ export function SqlConsole({ config }: { config: SupersetToolConfig }) {
 
   return (
     <div className="flex flex-col md:flex-row text-sm">
-      <div className="md:w-48 shrink-0 border-b md:border-b-0 md:border-r border-border p-3">
-        <div className="text-xs text-muted uppercase tracking-wide mb-2">{config.database}</div>
-        <div className="text-xs font-semibold mb-1">{config.table}</div>
-        <ul className="space-y-0.5 text-xs text-muted font-mono">
+      <div className="shrink-0 border-b md:border-b-0 md:border-r border-border p-3.5 sm:p-4 md:w-44 overflow-x-auto">
+        <div className="text-[10px] text-muted-2 uppercase tracking-wider font-semibold mb-2">{config.database}</div>
+        <div className="text-[13px] font-semibold mb-1.5">{config.table}</div>
+        <ul className="flex flex-wrap gap-x-3 gap-y-0.5 md:block md:space-y-0.5 text-[11px] text-muted font-mono whitespace-nowrap">
           {SCHEMA_COLUMNS.map((c) => (
             <li key={c}>{c}</li>
           ))}
         </ul>
       </div>
 
-      <div className="flex-1 min-w-0 p-3">
+      <div className="flex-1 min-w-0 p-3.5 sm:p-4">
         <CodeMirror
           value={query}
           height="120px"
           theme={oneDark}
           extensions={[sqlLang()]}
           onChange={(v) => setQuery(v)}
-          className="rounded border border-border overflow-hidden text-xs"
+          className="rounded-xl overflow-hidden text-[13px] ring-1 ring-border"
         />
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-2 mt-3">
           <button
             type="button"
             onClick={run}
             disabled={!ready || loading}
-            className="rounded bg-accent text-accent-foreground px-4 py-1.5 text-xs font-semibold disabled:opacity-50"
+            className="min-h-9 rounded-full bg-accent text-accent-foreground px-4 py-1.5 text-[13px] font-semibold disabled:opacity-40 transition-all active:scale-95"
           >
-            {loading ? "Running…" : ready ? "RUN" : "Loading engine…"}
+            {loading ? "Running…" : ready ? "Run" : "Loading engine…"}
           </button>
           {result && (
             <button
               type="button"
               onClick={() => downloadCsv(result)}
-              className="rounded border border-border px-3 py-1.5 text-xs text-muted hover:text-foreground"
+              className="min-h-9 rounded-full border border-border px-3.5 py-1.5 text-[13px] text-muted hover:text-foreground transition-colors"
             >
               Export CSV
             </button>
@@ -98,12 +98,12 @@ export function SqlConsole({ config }: { config: SupersetToolConfig }) {
         {error && <div className="mt-2 text-xs text-danger font-mono">{error}</div>}
 
         {result && (
-          <div className="mt-3 overflow-x-auto border border-border rounded">
+          <div className="mt-3 overflow-x-auto rounded-xl ring-1 ring-border">
             <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className="bg-surface-2 text-muted">
+                <tr className="bg-surface-2 text-muted-2">
                   {result.columns.map((c) => (
-                    <th key={c} className="px-2 py-1.5 text-left font-normal whitespace-nowrap">
+                    <th key={c} className="px-2.5 py-2 text-left font-medium whitespace-nowrap">
                       {c}
                     </th>
                   ))}
@@ -111,9 +111,9 @@ export function SqlConsole({ config }: { config: SupersetToolConfig }) {
               </thead>
               <tbody>
                 {result.rows.slice(0, 100).map((row, i) => (
-                  <tr key={i} className="border-t border-border/50">
+                  <tr key={i} className="border-t border-border/60">
                     {result.columns.map((c) => (
-                      <td key={c} className="px-2 py-1 font-mono whitespace-nowrap">
+                      <td key={c} className="px-2.5 py-1.5 font-mono whitespace-nowrap">
                         {String(row[c])}
                       </td>
                     ))}
@@ -121,7 +121,7 @@ export function SqlConsole({ config }: { config: SupersetToolConfig }) {
                 ))}
               </tbody>
             </table>
-            <div className="px-2 py-1 text-[11px] text-muted">{result.rows.length} row(s)</div>
+            <div className="px-2.5 py-1.5 text-[11px] text-muted-2">{result.rows.length} row(s)</div>
           </div>
         )}
       </div>
