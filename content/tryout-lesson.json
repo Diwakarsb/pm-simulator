@@ -1,0 +1,102 @@
+{
+  "module": {
+    "id": "pm-bigtech-skill-test",
+    "title": "PM in BigTech: Skill Test",
+    "subtitle": "20+ EXERCISES / 45 MINS OF PRACTICE",
+    "description": "About 20 tasks, built according to the logic of the product life cycle. Working with metrics, prioritization, planning, customer interviews, Mixpanel reports, SQL, API calls, and unit economics.",
+    "isFree": true
+  },
+  "characters": [
+    { "id": "andrew", "name": "Andrew", "role": "Sr. PM ML, mentor" },
+    { "id": "jane", "name": "Jane", "role": "Principal Product Manager" },
+    { "id": "ingrid", "name": "Ingrid", "role": "Marketing specialist" }
+  ],
+  "lesson": {
+    "id": "find-your-pm-blind-spots",
+    "title": "Find Your PM Blind Spots",
+    "note": "Blocks are ordered. type=message/artifact/tool/question/continue/feedback. Options carry weight (1 full, 0.5 partial, 0 wrong) and a feedbackId. Highlight keywords with **bold** or a highlight span in rendering. This seed reproduces the first 5 verified tasks; later tasks (API, unit economics, A/B, interviews, LLM) follow the same shell and should be authored similarly.",
+    "blocks": [
+      { "type": "message", "character": "andrew", "markdown": "Hello! I am one of the authors of the ProductDo simulators. The PM profession requires several skills at once: OKRs, SQL, analytics, user interviews, API testing, A/B testing, unit economics, and LLMs. We've prepared 20+ practice tasks. You'll work with real tools like SQL, Mixpanel, APIs, and Replit AI. ~30 min. A 10% coupon awaits at the end." },
+      { "type": "continue", "label": "Sounds good!" },
+
+      { "type": "message", "character": "jane", "markdown": "Hi! I'm your senior colleague. Our product is a clothing rental service by subscription. We have quarterly planning today and haven't defined OKRs yet. What do you think of this Q2 draft?" },
+      { "type": "artifact", "kind": "okr", "content": "Objective: Reach self-sufficiency by the end of the quarter\n\nKey Results:\n- Increase the conversion rate of the main landing page\n- Increase the percentage of successful payments\n- Add new clothing categories" },
+      { "type": "question", "id": "q_okr_1", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "I'm not quite sure what this is about....", "weight": 0, "feedbackId": null },
+        { "id": "b", "label": "It lacks measurable results", "weight": 1, "feedbackId": "f_okr_1" },
+        { "id": "c", "label": "Tasks must be related to each other", "weight": 0, "feedbackId": null },
+        { "id": "d", "label": "That's a great OKR", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "f_okr_1", "verdict": "correct", "markdown": "It's okay to not have numbers in the Objective — it should be descriptive, ambitious, motivating. But KRs must be clear and measurable. Big difference between 'increase conversion' and 'increase conversion by 20%'. Let's improve this OKR." },
+      { "type": "continue", "label": "Interesting!" },
+
+      { "type": "message", "character": "jane", "markdown": "How do you like this version?" },
+      { "type": "artifact", "kind": "okr", "content": "Objective: Reach self-sufficiency by the end of the quarter\n\nKey Results:\n- Increase the conversion rate of the main landing page from 4% to 7%\n- Increase the percentage of successful payments from 80% to 90% by adding an automatic testing mechanism\n- Add 4 new clothing categories\n- Continue to fix emerging bugs" },
+      { "type": "question", "id": "q_okr_2", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Now it's good", "weight": 0, "feedbackId": null },
+        { "id": "b", "label": "Still not very good", "weight": 1, "feedbackId": "f_okr_2" }
+      ]},
+      { "type": "feedback", "id": "f_okr_2", "verdict": "correct", "markdown": "Better — fixed immeasurability, but added two problems: 'continue to fix bugs' is a process not a result; 'by adding a mechanism...' prescribes HOW (the team decides how)." },
+      { "type": "continue", "label": "Let's correct it" },
+
+      { "type": "message", "character": "jane", "markdown": "Taking all that into account, the Q2 OKR looks like this:" },
+      { "type": "artifact", "kind": "okr", "content": "Objective: Reach self-sufficiency by the end of the quarter\n\nKey Results:\n- Increase the conversion rate of the main landing page from 4% to 7%\n- Increase the percentage of successful payments from 80% to 90%\n- Bring in +7% new users" },
+      { "type": "question", "id": "q_okr_3", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "There's a mistake somewhere again...", "weight": 0, "feedbackId": null },
+        { "id": "b", "label": "Well, now it's a definite yes.", "weight": 1, "feedbackId": "f_okr_3" }
+      ]},
+      { "type": "feedback", "id": "f_okr_3", "verdict": "correct", "markdown": "Professional OKR. Note the last line changed from a HOW (4 categories) to a RESULT (+7% new traffic). OKR = ambitious Objective + specific, measurable, achievable KRs that don't dictate how. PM owns 3 horizons: short-term (sprint user stories), medium (OKRs/epics), long (strategy/vision/mission).", "crossSellModuleId": "product-planning" },
+      { "type": "continue", "label": "Thank you!" },
+
+      { "type": "message", "character": "jane", "markdown": "Our marketer was looking for you — she's having trouble with her metrics and was in a panic. Please help her." },
+      { "type": "continue", "label": "Wow, it's serious" },
+
+      { "type": "message", "character": "ingrid", "markdown": "Hi! I have a quarterly report and my manager said 'Can't you write simple SQL?' I need to know how many January paid subscriptions came from **Google Ads**. My query only shows all subscriptions for the period. Can you count only the Google ones?" },
+      { "type": "artifact", "kind": "code", "lang": "sql", "content": "SELECT COUNT(user_id) --\"Select the number of user IDs\"\nFROM viditation_user -- \"from the viditation_user table\"\nWHERE is_premium = TRUE --\"who paid for the premium subscription\"\nAND created_date between '2022-01-01' and '2022-02-01' --\"purchase date Jan 1 – Feb 1\"" },
+      { "type": "tool", "kind": "superset", "collapsedLabel": "If you want to run the query yourself", "config": { "database": "Viditation Database", "schema": "public", "table": "viditation_user", "defaultQuery": "SELECT * FROM viditation_user LIMIT 100" } },
+      { "type": "question", "id": "q_sql", "prompt": "Count only users who came from Google.", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "116 users came from Google", "weight": 0, "feedbackId": null },
+        { "id": "b", "label": "17 users came from Google", "weight": 1, "feedbackId": "f_sql" },
+        { "id": "c", "label": "Hmm, it didn't work", "weight": 0, "feedbackId": null },
+        { "id": "d", "label": "I'm too lazy to run the query, but I know I need to add \"AND acquisition_channel = 'google'\" as the last line.", "weight": 0.5, "feedbackId": "f_sql" },
+        { "id": "e", "label": "I'm too lazy to run the query, but I know I need to add \"IN CASE acquisition_channel = 'google'\" as the last line.", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "f_sql", "verdict": "correct", "markdown": "Wow, 17 subscriptions — so we won't develop this channel. You just add `AND acquisition_channel = 'google'` as the last line. ('IN CASE' is not valid SQL.)", "crossSellModuleId": "sql-for-pms" },
+      { "type": "continue", "label": "Happy to help!" },
+
+      { "type": "message", "character": "ingrid", "markdown": "I need to calculate MAU (Monthly Active Users) for January. All I have is average WAU by week for January, and it's 180. Please calculate MAU for January." },
+      { "type": "question", "id": "q_mau_reason", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "~180", "weight": 0, "feedbackId": null },
+        { "id": "b", "label": "~45", "weight": 0, "feedbackId": null },
+        { "id": "c", "label": "~720", "weight": 0, "feedbackId": null },
+        { "id": "d", "label": "It is clear that it is impossible to determine MAU here", "weight": 1, "feedbackId": "f_mau_reason" },
+        { "id": "e", "label": "It's unclear", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "f_mau_reason", "verdict": "correct", "markdown": "Indeed! Audience for a period = unique users who visited at least once. Knowing only avg weekly uniques (180), MAU could be anywhere from 180 (same people every week) to ~720 (WAU*4, different people). Without the visit-distribution we can't know — a 4x difference is too big to guess." },
+      { "type": "continue", "label": "We need to look at the analytical data!" },
+
+      { "type": "message", "character": "ingrid", "markdown": "You PMs use Mixpanel. Behavioral analytics stores 'everything' (visits, clicks, feature use), so you can quickly test ideas. I made a chart by week for January — see the screenshot. What is MAU for January?" },
+      { "type": "tool", "kind": "mixpanel-insights", "collapsedLabel": "If you want to play with the report yourself", "config": { "metric": "Uniques of Session Start", "grouping": "week", "weekly": [ { "label": "Dec 30", "value": 41 }, { "label": "Jan 6", "value": 127 }, { "label": "Jan 13", "value": 225 }, { "label": "Jan 20", "value": 326 }, { "label": "Jan 27", "value": 313 } ], "weeklyAverage": 206.4, "monthlyUnique": 579 } },
+      { "type": "question", "id": "q_mau_mixpanel", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "I opened the report in Mixpanel, and I see 1083 per month", "weight": 0, "feedbackId": null },
+        { "id": "b", "label": "I opened the report in Mixpanel, and I see 579 per month", "weight": 1, "feedbackId": "f_mau_mixpanel" },
+        { "id": "c", "label": "I opened the report in Mixpanel, and I see 872 per month", "weight": 0, "feedbackId": null },
+        { "id": "d", "label": "I'm too lazy to open Mixpanel, but you can use the screenshot: the sum of the weekly values is 1083", "weight": 0, "feedbackId": null },
+        { "id": "e", "label": "I'm too lazy to open Mixpanel, but you can't determine MAU from a screenshot alone", "weight": 1, "feedbackId": "f_mau_mixpanel" }
+      ]},
+      { "type": "feedback", "id": "f_mau_mixpanel", "verdict": "correct", "markdown": "Exactly! You can't sum weekly uniques — weekly-unique visitors aren't necessarily unique for the month (some visit twice). Switch the report to monthly grouping and Mixpanel computes it: MAU = 579. Not at all what the simpler methods assumed.", "crossSellModuleId": "analytics-for-pms" },
+      { "type": "continue", "label": "It was easy indeed" },
+
+      { "type": "message", "character": "ingrid", "markdown": "Last one! We're improving a 5-step onboarding. Overall conversion is only ~35% (2,074 finished / 5,952 started). We can only fix one step for the biggest impact. Column labels show % who reached this step from the previous (top) and absolute count (bottom). Which step should we improve first?" },
+      { "type": "tool", "kind": "mixpanel-funnel", "collapsedLabel": "here is a link to this chart in Mixpanel", "config": { "steps": [ { "name": "Start (Onboarding)", "count": 5952, "stepConversionFromPrev": null }, { "name": "Step 1 (Onboarding)", "count": 4633, "stepConversionFromPrev": 77.84 }, { "name": "Step 2 (Onboarding)", "count": 2899, "stepConversionFromPrev": 62.57 }, { "name": "Step 3 (Onboarding)", "count": 2141, "stepConversionFromPrev": 73.85 }, { "name": "Finish (Onboarding)", "count": 2074, "stepConversionFromPrev": 96.87 } ], "overallConversion": 34.85 } },
+      { "type": "question", "id": "q_funnel", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Start", "weight": 0, "feedbackId": null },
+        { "id": "b", "label": "Step 1", "weight": 1, "feedbackId": "f_funnel" },
+        { "id": "c", "label": "Step 2", "weight": 0, "feedbackId": null },
+        { "id": "d", "label": "Step 3", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "f_funnel", "verdict": "correct", "markdown": "Absolutely right! The largest drop is after Step 1 — only 62.57% move from Step 1 to Step 2. That's where a fix has the biggest impact on overall conversion. Prioritize the biggest drop-off, not the overall rate.", "crossSellModuleId": "analytics-for-pms" },
+      { "type": "continue", "label": "Analytics is cool" }
+    ]
+  }
+}
