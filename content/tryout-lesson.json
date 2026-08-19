@@ -7,7 +7,7 @@
     "isFree": true
   },
   "characters": [
-    { "id": "andrew", "name": "Andrew", "role": "Sr. PM ML, mentor" },
+    { "id": "andrew", "name": "Diwakar Badiger", "role": "AI Product Manager", "avatarUrl": "/avatars/diwakar.jpg" },
     { "id": "jane", "name": "Jane", "role": "Principal Product Manager" },
     { "id": "ingrid", "name": "Ingrid", "role": "Marketing specialist" }
   ],
