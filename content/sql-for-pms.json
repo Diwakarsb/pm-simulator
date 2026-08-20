@@ -1,0 +1,119 @@
+{
+  "module": {
+    "id": "sql-for-pms",
+    "title": "SQL for Product Managers",
+    "subtitle": "50+ EXERCISES / 6 HOURS OF PRACTICE",
+    "description": "Make decisions from data, not intuition. Query a real database with SQL in an embedded console. Case: a meditation app (Calmly).",
+    "priceEUR": 159,
+    "isFree": false
+  },
+  "characters": [
+    { "id": "andrew", "name": "Diwakar Badiger", "role": "AI Product Manager", "avatarUrl": "/avatars/diwakar.jpg" },
+    { "id": "nadia", "name": "Nadia", "role": "Data Analyst" },
+    { "id": "leo", "name": "Leo", "role": "Growth PM" }
+  ],
+  "lesson": {
+    "id": "sql-essentials-for-pms",
+    "title": "SQL Essentials: Ask the Database",
+    "toolDefaults": { "kind": "sql", "database": "Calmly Database", "schema": "public", "collapsedLabel": "Open the SQL console" },
+    "dataset": "calmly (see data/calmly.schema.sql). Seed so the answer keys below hold.",
+    "note": "All tasks use the embedded DuckDB-WASM SQL console. verdict/weight/feedback as in the base engine. Where a numeric answer is required, the console lets the learner derive it; grading is on the chosen option (optionally auto-verify the query result — see engine spec).",
+    "blocks": [
+      { "type": "message", "character": "nadia", "markdown": "Welcome to the data team! Our product is **Calmly**, a meditation app. Everything users do lands in a Postgres database. As a PM you'll answer your own data questions instead of waiting in the analyst queue. Let's start simple." },
+      { "type": "continue", "label": "Let's go" },
+
+      { "type": "message", "character": "nadia", "markdown": "This is our main table, `users`. Take a look at the schema on the left and run `SELECT * FROM users LIMIT 100`. How many **columns** does the `users` table have?" },
+      { "type": "tool", "kind": "sql", "config": { "table": "users", "defaultQuery": "SELECT * FROM users LIMIT 100" } },
+      { "type": "question", "id": "sql_q1", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "9", "weight": 0, "feedbackId": null },
+        { "id": "b", "label": "11", "weight": 1, "feedbackId": "sql_f1" },
+        { "id": "c", "label": "13", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "sql_f1", "verdict": "correct", "markdown": "Right — 11 columns. Reading a schema is the first SQL skill: you can't query fields you don't know exist." },
+      { "type": "continue", "label": "Next" },
+
+      { "type": "message", "character": "nadia", "markdown": "How many users signed up in **January 2024**? Filter `created_at` to that month and `COUNT` them." },
+      { "type": "tool", "kind": "sql", "config": { "table": "users", "defaultQuery": "SELECT COUNT(*) FROM users\nWHERE created_at >= '2024-01-01' AND created_at < '2024-02-01'" } },
+      { "type": "question", "id": "sql_q2", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "1,204", "weight": 1, "feedbackId": "sql_f2" },
+        { "id": "b", "label": "1,560", "weight": 0, "feedbackId": null },
+        { "id": "c", "label": "980", "weight": 0, "feedbackId": null },
+        { "id": "d", "label": "I used created_at <= '2024-02-01' and got 1,213", "weight": 0.5, "feedbackId": "sql_f2" }
+      ]},
+      { "type": "feedback", "id": "sql_f2", "verdict": "correct", "markdown": "1,204. Note the boundary: use `< '2024-02-01'`, not `<= `, or you accidentally include Feb 1st. Half-open ranges are the safe habit for dates." },
+      { "type": "continue", "label": "Got it" },
+
+      { "type": "message", "character": "leo", "markdown": "Hey, Growth PM here. Which **acquisition channel** brought the most users? Give me the top channel by count. (`GROUP BY channel`, `ORDER BY` count, `LIMIT 1`.)" },
+      { "type": "tool", "kind": "sql", "config": { "table": "users", "defaultQuery": "SELECT channel, COUNT(*) AS n\nFROM users\nGROUP BY channel\nORDER BY n DESC" } },
+      { "type": "question", "id": "sql_q3", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "organic", "weight": 1, "feedbackId": "sql_f3" },
+        { "id": "b", "label": "google_ads", "weight": 0, "feedbackId": null },
+        { "id": "c", "label": "referral", "weight": 0, "feedbackId": null },
+        { "id": "d", "label": "instagram", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "sql_f3", "verdict": "correct", "markdown": "`organic` leads. `GROUP BY` + `ORDER BY count DESC` is the workhorse pattern for 'which category is biggest?' questions." },
+      { "type": "continue", "label": "Next" },
+
+      { "type": "message", "character": "leo", "markdown": "What's our **paid-subscription conversion rate** overall? That's premium users divided by all users, as a percent. Careful with integer division." },
+      { "type": "tool", "kind": "sql", "config": { "table": "users", "defaultQuery": "SELECT 100.0 * SUM(CASE WHEN is_premium THEN 1 ELSE 0 END) / COUNT(*) AS conv_pct\nFROM users" } },
+      { "type": "question", "id": "sql_q4", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "~6.2%", "weight": 1, "feedbackId": "sql_f4" },
+        { "id": "b", "label": "0% — the query returned 0", "weight": 0.5, "feedbackId": "sql_f4" },
+        { "id": "c", "label": "~62%", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "sql_f4", "verdict": "correct", "markdown": "~6.2%. If you got 0, you hit **integer division** — `premium/total` with integers truncates to 0. Multiply by `100.0` (a float) first, as in the query." },
+      { "type": "continue", "label": "Sneaky" },
+
+      { "type": "message", "character": "nadia", "markdown": "Marketing thinks paid channels bring premium users. Show the **premium conversion rate by channel**, highest first. Which channel converts best to premium?" },
+      { "type": "tool", "kind": "sql", "config": { "table": "users", "defaultQuery": "SELECT channel,\n  100.0 * SUM(CASE WHEN is_premium THEN 1 ELSE 0 END)/COUNT(*) AS conv_pct,\n  COUNT(*) AS n\nFROM users GROUP BY channel ORDER BY conv_pct DESC" } },
+      { "type": "question", "id": "sql_q5", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "referral — highest conversion, and a healthy user count", "weight": 1, "feedbackId": "sql_f5" },
+        { "id": "b", "label": "a tiny channel with 12 users and 50% conversion", "weight": 0, "feedbackId": "sql_f5" },
+        { "id": "c", "label": "organic — it has the most users", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "sql_f5", "verdict": "correct", "markdown": "`referral` converts best with enough volume to trust. Watch for small-sample traps: a channel with 12 users at 50% isn't a real signal. Always look at the count alongside the rate." },
+      { "type": "continue", "label": "Noted" },
+
+      { "type": "message", "character": "nadia", "markdown": "Now a join. `sessions` logs every meditation session (one row per session, with `user_id`). What's the **average number of sessions per user** in January 2024? Think about which users count in the denominator." },
+      { "type": "tool", "kind": "sql", "config": { "table": "sessions", "defaultQuery": "SELECT COUNT(*) * 1.0 / COUNT(DISTINCT user_id) AS avg_sessions_per_user\nFROM sessions\nWHERE started_at >= '2024-01-01' AND started_at < '2024-02-01'" } },
+      { "type": "question", "id": "sql_q6", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "~4.7 sessions per active user", "weight": 1, "feedbackId": "sql_f6" },
+        { "id": "b", "label": "~2.1 — divide by all signed-up users", "weight": 0, "feedbackId": "sql_f6" },
+        { "id": "c", "label": "Impossible without a JOIN to users", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "sql_f6", "verdict": "correct", "markdown": "~4.7 per **active** user (`COUNT(DISTINCT user_id)` in the denominator). Dividing by all signups answers a different question (engagement across the whole base). Define your denominator on purpose." },
+      { "type": "continue", "label": "Makes sense" },
+
+      { "type": "message", "character": "leo", "markdown": "I want the **7-day retention** for the January signup cohort: of users who signed up Jan 1–31, what % had at least one session 7+ days after signup? This needs a JOIN between `users` and `sessions`." },
+      { "type": "tool", "kind": "sql", "config": { "table": "users, sessions", "defaultQuery": "SELECT 100.0 * COUNT(DISTINCT s.user_id) / COUNT(DISTINCT u.id) AS d7_retention\nFROM users u\nLEFT JOIN sessions s\n  ON s.user_id = u.id\n  AND s.started_at >= u.created_at + INTERVAL '7 days'\nWHERE u.created_at >= '2024-01-01' AND u.created_at < '2024-02-01'" } },
+      { "type": "question", "id": "sql_q7", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "~28%", "weight": 1, "feedbackId": "sql_f7" },
+        { "id": "b", "label": "~100% — every user has a session", "weight": 0, "feedbackId": "sql_f7" },
+        { "id": "c", "label": "~72%", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "sql_f7", "verdict": "correct", "markdown": "~28%. The JOIN condition carries the '7+ days after signup' logic; the `LEFT JOIN` keeps users with no qualifying session so the denominator stays the full cohort. Retention questions are cohort + time-offset joins." },
+      { "type": "continue", "label": "Powerful" },
+
+      { "type": "message", "character": "nadia", "markdown": "A trap question. Someone reports 'average session length is 21 minutes' from `SELECT AVG(duration_min) FROM sessions`. You glance at the data and see a few sessions with `duration_min = 100000` (a logging bug). What should you do before trusting that average?" },
+      { "type": "question", "id": "sql_q8", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Use the MEDIAN, and/or filter outliers — the mean is distorted by bad rows", "weight": 1, "feedbackId": "sql_f8" },
+        { "id": "b", "label": "Report 21 minutes — AVG is the standard", "weight": 0, "feedbackId": "sql_f8" },
+        { "id": "c", "label": "Delete the whole sessions table and start over", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "sql_f8", "verdict": "correct", "markdown": "Outliers wreck the mean. Check the distribution (`MIN`/`MAX`/percentiles), filter obvious bad rows, and prefer the **median** (`PERCENTILE_CONT(0.5)`) for skewed data. 'Communicating with data' includes sanity-checking it." },
+      { "type": "continue", "label": "Always sanity-check" },
+
+      { "type": "message", "character": "leo", "markdown": "Final one. I need **new premium subscriptions per week** for a trend chart. Which query shape gives me a weekly time series?" },
+      { "type": "tool", "kind": "sql", "config": { "table": "users", "defaultQuery": "SELECT date_trunc('week', premium_started_at) AS wk, COUNT(*) AS n\nFROM users\nWHERE is_premium\nGROUP BY 1 ORDER BY 1" } },
+      { "type": "question", "id": "sql_q9", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "GROUP BY date_trunc('week', premium_started_at)", "weight": 1, "feedbackId": "sql_f9" },
+        { "id": "b", "label": "GROUP BY premium_started_at (raw timestamp)", "weight": 0, "feedbackId": "sql_f9" },
+        { "id": "c", "label": "Just COUNT(*) with no GROUP BY", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "sql_f9", "verdict": "correct", "markdown": "Bucket the timestamp with `date_trunc('week', ...)` then group by the bucket. Grouping by the raw timestamp gives one row per second — useless for a trend. This pattern powers almost every dashboard chart.", "crossSellModuleId": "analytics-for-pms" },
+      { "type": "continue", "label": "That's a wrap" },
+
+      { "type": "message", "character": "andrew", "markdown": "Nicely done. You can now read a schema, filter dates safely, group and rank, avoid integer-division and small-sample traps, join tables for retention, and bucket time for trends. That's most of a PM's daily SQL. Keep practicing on the full module." }
+    ]
+  }
+}

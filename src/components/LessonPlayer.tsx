@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import type { LessonContent } from "@/lib/types";
+import type { DatasetKey } from "@/lib/duckdb";
 import { useLessonStore } from "@/lib/store";
 import { computeScore } from "@/lib/grading";
 import { MessageBlock } from "@/components/blocks/MessageBlock";
@@ -11,36 +12,34 @@ import { QuestionBlock } from "@/components/blocks/QuestionBlock";
 import { FeedbackBlock } from "@/components/blocks/FeedbackBlock";
 import { ContinueBlock } from "@/components/blocks/ContinueBlock";
 
+function datasetKeyFor(lesson: LessonContent["lesson"]): DatasetKey {
+  const hint = `${lesson.dataset ?? ""} ${lesson.toolDefaults?.database ?? ""}`.toLowerCase();
+  return hint.includes("calmly") ? "calmly" : "viditation";
+}
+
 export function LessonPlayer({ content }: { content: LessonContent }) {
   const { lesson, characters } = content;
   const charactersById = Object.fromEntries(characters.map((c) => [c.id, c]));
+  const datasetKey = datasetKeyFor(lesson);
 
-  const {
-    lessonId,
-    revealedCount,
-    answers,
-    selectedOption,
-    initLesson,
-    selectOption,
-    submitAnswer,
-    advance,
-    getAnswer,
-    reset,
-  } = useLessonStore();
+  const { initLesson, selectOption, submitAnswer, advance, getProgress, getAnswer, reset } =
+    useLessonStore();
 
   useEffect(() => {
     initLesson(lesson);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id]);
 
-  if (lessonId !== lesson.id && revealedCount === 0) {
+  const progress = getProgress(lesson.id);
+  const { revealedCount, answers, selectedOption } = progress;
+
+  if (revealedCount === 0) {
     return <div className="text-muted text-sm">Loading lesson…</div>;
   }
 
   const visibleBlocks = lesson.blocks.slice(0, revealedCount);
   const percent = Math.round((revealedCount / lesson.blocks.length) * 100);
-  const questionAnswers = answers;
-  const { score, maxScore } = computeScore(questionAnswers);
+  const { score, maxScore } = computeScore(answers);
 
   return (
     <div className="pb-24">
@@ -68,15 +67,22 @@ export function LessonPlayer({ content }: { content: LessonContent }) {
             case "artifact":
               return <ArtifactBlock key={key} block={block} />;
             case "tool":
-              return <ToolBlock key={key} block={block} />;
+              return (
+                <ToolBlock
+                  key={key}
+                  block={block}
+                  toolDefaults={lesson.toolDefaults}
+                  datasetKey={datasetKey}
+                />
+              );
             case "question":
               return (
                 <QuestionBlock
                   key={key}
                   block={block}
-                  answer={getAnswer(block.id)}
+                  answer={getAnswer(lesson.id, block.id)}
                   selectedId={selectedOption[block.id]}
-                  onSelect={(optionId) => selectOption(block.id, optionId)}
+                  onSelect={(optionId) => selectOption(lesson.id, block.id, optionId)}
                   onSubmit={() => {
                     const optionId = selectedOption[block.id];
                     const option = block.options.find((o) => o.id === optionId);
@@ -109,7 +115,7 @@ export function LessonPlayer({ content }: { content: LessonContent }) {
           </div>
           <button
             type="button"
-            onClick={reset}
+            onClick={() => reset(lesson.id)}
             className="mt-5 min-h-11 rounded-full bg-surface-2 px-5 py-2 text-sm font-medium text-foreground transition-all active:scale-95 hover:bg-surface-elevated"
           >
             Restart lesson

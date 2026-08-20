@@ -1,0 +1,114 @@
+{
+  "module": {
+    "id": "unit-economics-for-pms",
+    "title": "Unit Economics & Product Discovery",
+    "subtitle": "70+ EXERCISES / 6 HOURS OF PRACTICE",
+    "description": "Can the product make money per customer? Build a unit-economics model — CAC, LTV, margin, payback — in an editable grid. Case: Calmly meditation app subscription.",
+    "priceEUR": 139,
+    "isFree": false
+  },
+  "characters": [
+    { "id": "andrew", "name": "Diwakar Badiger", "role": "AI Product Manager", "avatarUrl": "/avatars/diwakar.jpg" },
+    { "id": "sam", "name": "Sam", "role": "Finance / BizOps partner" },
+    { "id": "leo", "name": "Leo", "role": "Growth PM" }
+  ],
+  "lesson": {
+    "id": "unit-economics-essentials",
+    "title": "Does Each Customer Make Us Money?",
+    "note": "Uses an econ-grid widget: an editable table of labeled cells (some given, some computed by the learner) plus a scenario panel. Fixture-driven from config.cells. Learner computes values in the grid, then answers the multiple-choice. Same grading model. Numbers are round for teaching.",
+    "blocks": [
+      { "type": "message", "character": "sam", "markdown": "Hi, I'm Sam from BizOps. A product can have millions of users and still be a money pit. **Unit economics** asks a simple question: does one average customer earn more than they cost? Let's build the model for **Calmly Premium** together." },
+      { "type": "continue", "label": "Let's model it" },
+
+      { "type": "message", "character": "sam", "markdown": "Start with **CAC** (Customer Acquisition Cost). Last month we spent **$40,000** on marketing and acquired **2,000** paying customers. What's CAC?" },
+      { "type": "tool", "kind": "econ-grid", "config": { "cells": [ { "label": "Marketing spend", "value": 40000, "unit": "$", "given": true }, { "label": "New paying customers", "value": 2000, "given": true }, { "label": "CAC", "formula": "spend / customers", "computed": true } ] } },
+      { "type": "question", "id": "ue_q1", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "$20 per customer", "weight": 1, "feedbackId": "ue_f1" },
+        { "id": "b", "label": "$40,000 per customer", "weight": 0, "feedbackId": null },
+        { "id": "c", "label": "$0.05 per customer", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ue_f1", "verdict": "correct", "markdown": "CAC = $40,000 / 2,000 = **$20**. Blended CAC uses total spend ÷ total new customers. (Paid-only CAC would exclude organic signups — worth separating later.)" },
+      { "type": "continue", "label": "Next" },
+
+      { "type": "message", "character": "sam", "markdown": "Calmly Premium costs **$10/month**. But payment fees + content licensing eat **30%**. What's the **gross margin per subscriber per month** in dollars?" },
+      { "type": "tool", "kind": "econ-grid", "config": { "cells": [ { "label": "Price / month", "value": 10, "unit": "$", "given": true }, { "label": "Variable cost %", "value": 30, "unit": "%", "given": true }, { "label": "Gross margin / month", "formula": "price * (1 - cost%)", "computed": true } ] } },
+      { "type": "question", "id": "ue_q2", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "$7 per month", "weight": 1, "feedbackId": "ue_f2" },
+        { "id": "b", "label": "$10 per month", "weight": 0, "feedbackId": "ue_f2" },
+        { "id": "c", "label": "$3 per month", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ue_f2", "verdict": "correct", "markdown": "$10 × (1 − 0.30) = **$7** gross margin/month. LTV is built on *margin*, not revenue — the $3 of variable cost never reaches you. Confusing price with margin is a classic error." },
+      { "type": "continue", "label": "Margin, not revenue" },
+
+      { "type": "message", "character": "sam", "markdown": "How long does a subscriber stay? Our monthly churn is **5%**. Average **lifetime in months ≈ 1 / churn**. What's the average customer lifetime?" },
+      { "type": "tool", "kind": "econ-grid", "config": { "cells": [ { "label": "Monthly churn", "value": 5, "unit": "%", "given": true }, { "label": "Avg lifetime (months)", "formula": "1 / churn", "computed": true } ] } },
+      { "type": "question", "id": "ue_q3", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "20 months", "weight": 1, "feedbackId": "ue_f3" },
+        { "id": "b", "label": "5 months", "weight": 0, "feedbackId": null },
+        { "id": "c", "label": "50 months", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ue_f3", "verdict": "correct", "markdown": "1 / 0.05 = **20 months**. This is a handy approximation: lower churn → longer lifetime → more value. A 5%→4% churn improvement moves lifetime from 20 to 25 months — a big deal, as you'll see." },
+      { "type": "continue", "label": "Next" },
+
+      { "type": "message", "character": "sam", "markdown": "Now **LTV** (Lifetime Value) = gross margin/month × lifetime. Using $7/month and 20 months, what's LTV?" },
+      { "type": "tool", "kind": "econ-grid", "config": { "cells": [ { "label": "Gross margin / month", "value": 7, "unit": "$", "given": true }, { "label": "Lifetime (months)", "value": 20, "given": true }, { "label": "LTV", "formula": "margin * lifetime", "computed": true } ] } },
+      { "type": "question", "id": "ue_q4", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "$140", "weight": 1, "feedbackId": "ue_f4" },
+        { "id": "b", "label": "$200 (used price not margin)", "weight": 0, "feedbackId": "ue_f4" },
+        { "id": "c", "label": "$70", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ue_f4", "verdict": "correct", "markdown": "$7 × 20 = **$140**. If you got $200 you used *price* ($10) instead of *margin* ($7) — a very common overstatement of LTV. Always build LTV from contribution margin." },
+      { "type": "continue", "label": "LTV = $140" },
+
+      { "type": "message", "character": "leo", "markdown": "The headline ratio investors ask about: **LTV / CAC**. With LTV $140 and CAC $20, what is it — and is that good?" },
+      { "type": "tool", "kind": "econ-grid", "config": { "cells": [ { "label": "LTV", "value": 140, "unit": "$", "given": true }, { "label": "CAC", "value": 20, "unit": "$", "given": true }, { "label": "LTV/CAC", "formula": "ltv / cac", "computed": true } ] } },
+      { "type": "question", "id": "ue_q5", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "7.0 — very healthy (rule of thumb: 3+ is good)", "weight": 1, "feedbackId": "ue_f5" },
+        { "id": "b", "label": "0.14 — we lose money", "weight": 0, "feedbackId": "ue_f5" },
+        { "id": "c", "label": "7.0 — but we should probably spend more to grow", "weight": 0.5, "feedbackId": "ue_f5" }
+      ]},
+      { "type": "feedback", "id": "ue_f5", "verdict": "correct", "markdown": "$140 / $20 = **7.0**. Above ~3 is generally healthy. Interestingly, a ratio *this* high can mean you're **under-investing** in acquisition — there may be room to spend more per customer and still profit. (That's the partial-credit nuance.)" },
+      { "type": "continue", "label": "Interesting" },
+
+      { "type": "message", "character": "sam", "markdown": "Cash matters too. **CAC payback** = how many months of gross margin to earn back the $20 CAC. At $7/month margin?" },
+      { "type": "tool", "kind": "econ-grid", "config": { "cells": [ { "label": "CAC", "value": 20, "unit": "$", "given": true }, { "label": "Gross margin / month", "value": 7, "unit": "$", "given": true }, { "label": "Payback (months)", "formula": "cac / margin", "computed": true } ] } },
+      { "type": "question", "id": "ue_q6", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "~2.9 months", "weight": 1, "feedbackId": "ue_f6" },
+        { "id": "b", "label": "20 months", "weight": 0, "feedbackId": null },
+        { "id": "c", "label": "7 months", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ue_f6", "verdict": "correct", "markdown": "$20 / $7 ≈ **2.9 months**. Payback is a *cash* view: even with great LTV/CAC, a long payback strains a startup's runway because you front the CAC now and recover it slowly. Under ~12 months is comfortable for subscriptions." },
+      { "type": "continue", "label": "Cash vs profit" },
+
+      { "type": "message", "character": "leo", "markdown": "Growth proposes a new channel at **CAC $60**. Same $140 LTV. They say 'LTV still beats CAC, so ship it.' What's the sharper read?" },
+      { "type": "question", "id": "ue_q7", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "LTV/CAC falls to ~2.3 and payback stretches to ~8.6 months — viable but much weaker; scrutinize before scaling", "weight": 1, "feedbackId": "ue_f7" },
+        { "id": "b", "label": "Ship — any channel where LTV > CAC is equally good", "weight": 0, "feedbackId": "ue_f7" },
+        { "id": "c", "label": "Reject — CAC over $50 is always bad", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ue_f7", "verdict": "correct", "markdown": "$140/$60 ≈ 2.3 (below the ~3 comfort line) and payback ≈ 8.6 months. 'LTV > CAC' is a low bar — the *ratio* and *payback* decide whether a channel is worth scaling. Not all profitable channels are equally good." },
+      { "type": "continue", "label": "Ratios matter" },
+
+      { "type": "message", "character": "sam", "markdown": "Leadership wants to improve unit economics. Two levers: cut CAC 10% (to $18) OR reduce churn from 5% to 4%. Which has the bigger impact on **LTV/CAC**?" },
+      { "type": "tool", "kind": "econ-grid", "config": { "cells": [ { "label": "Option A: CAC", "value": 18, "unit": "$", "given": true, "note": "LTV stays $140 → LTV/CAC = 7.8" }, { "label": "Option B: churn 4%", "value": 4, "unit": "%", "given": true, "note": "lifetime 25 mo → LTV = 7×25 = $175 → /20 = 8.75" } ] } },
+      { "type": "question", "id": "ue_q8", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Reducing churn — lifetime 20→25 months lifts LTV to $175 and LTV/CAC to ~8.75, beating the CAC cut (~7.8)", "weight": 1, "feedbackId": "ue_f8" },
+        { "id": "b", "label": "Cutting CAC — it's the direct cost", "weight": 0, "feedbackId": "ue_f8" },
+        { "id": "c", "label": "They're identical", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ue_f8", "verdict": "correct", "markdown": "Retention compounds: 5%→4% churn stretches lifetime 20→25 months, LTV $140→$175, ratio ~8.75 vs ~7.8 for the CAC cut. This is why retention is often the highest-leverage lever in a subscription business — it multiplies every future month.", "crossSellModuleId": "analytics-for-pms" },
+      { "type": "continue", "label": "Retention wins" },
+
+      { "type": "message", "character": "sam", "markdown": "Last check — a reality caveat. Our model assumes constant 5% churn forever and that every cohort behaves the same. Why hold the LTV number loosely?" },
+      { "type": "question", "id": "ue_q9", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Churn isn't constant, cohorts differ, and discounting future cash matters — LTV is an estimate with assumptions, not a fact", "weight": 1, "feedbackId": "ue_f9" },
+        { "id": "b", "label": "It's exact — the formula is math", "weight": 0, "feedbackId": "ue_f9" },
+        { "id": "c", "label": "LTV doesn't matter, only revenue", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ue_f9", "verdict": "correct", "markdown": "The `1/churn` LTV is a clean approximation but real churn varies by cohort and declines over time for survivors; strictly you'd also discount future margin to present value. Use the model to compare decisions, not as a precise prophecy. Good PMs know their assumptions." },
+      { "type": "continue", "label": "Hold it loosely" },
+
+      { "type": "message", "character": "andrew", "markdown": "That's the whole engine: CAC, gross margin, lifetime, LTV, LTV/CAC, and payback — plus the judgment to know retention compounds and LTV is an estimate. You can now sanity-check whether a product actually makes money per customer, which is what turns a feature idea into a business case." }
+    ]
+  }
+}

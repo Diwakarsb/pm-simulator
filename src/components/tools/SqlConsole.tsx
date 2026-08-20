@@ -5,40 +5,39 @@ import CodeMirror from "@uiw/react-codemirror";
 import { sql as sqlLang } from "@codemirror/lang-sql";
 import { oneDark } from "@codemirror/theme-one-dark";
 import type { SupersetToolConfig } from "@/lib/types";
-import { ensureSeeded, runQuery, type QueryResult } from "@/lib/duckdb";
+import { DATASET_SCHEMAS, ensureSeeded, runQuery, type DatasetKey, type QueryResult } from "@/lib/duckdb";
 
-const SCHEMA_COLUMNS = [
-  "user_id",
-  "created_date",
-  "acquisition_channel",
-  "acquisition_campaign",
-  "country_iso",
-  "h_lifetime_days",
-  "h_session_frequency_days",
-  "age",
-  "goal",
-  "is_premium",
-  "acquisition_cost",
-  "is_skylark",
-  "onboarding_version",
-];
-
-export function SqlConsole({ config }: { config: SupersetToolConfig }) {
+export function SqlConsole({
+  config,
+  datasetKey = "viditation",
+}: {
+  config: SupersetToolConfig;
+  datasetKey?: DatasetKey;
+}) {
   const [query, setQuery] = useState(config.defaultQuery);
   const [result, setResult] = useState<QueryResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
+  const [seededFor, setSeededFor] = useState<typeof datasetKey | null>(null);
+
+  const schema = DATASET_SCHEMAS[datasetKey];
 
   useEffect(() => {
     let cancelled = false;
-    ensureSeeded()
-      .then(() => !cancelled && setReady(true))
+    ensureSeeded(datasetKey)
+      .then(() => {
+        if (cancelled) return;
+        setReady(true);
+        setSeededFor(datasetKey);
+      })
       .catch((e) => !cancelled && setError(String(e)));
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [datasetKey]);
+
+  const isReady = ready && seededFor === datasetKey;
 
   async function run() {
     setLoading(true);
@@ -57,13 +56,19 @@ export function SqlConsole({ config }: { config: SupersetToolConfig }) {
   return (
     <div className="flex flex-col md:flex-row text-sm">
       <div className="shrink-0 border-b md:border-b-0 md:border-r border-border p-3.5 sm:p-4 md:w-44 overflow-x-auto">
-        <div className="text-[10px] text-muted-2 uppercase tracking-wider font-semibold mb-2">{config.database}</div>
-        <div className="text-[13px] font-semibold mb-1.5">{config.table}</div>
-        <ul className="flex flex-wrap gap-x-3 gap-y-0.5 md:block md:space-y-0.5 text-[11px] text-muted font-mono whitespace-nowrap">
-          {SCHEMA_COLUMNS.map((c) => (
-            <li key={c}>{c}</li>
-          ))}
-        </ul>
+        <div className="text-[10px] text-muted-2 uppercase tracking-wider font-semibold mb-2">
+          {config.database ?? schema.database}
+        </div>
+        {schema.tables.map((table) => (
+          <div key={table.name} className="mb-3 last:mb-0">
+            <div className="text-[13px] font-semibold mb-1.5">{table.name}</div>
+            <ul className="flex flex-wrap gap-x-3 gap-y-0.5 md:block md:space-y-0.5 text-[11px] text-muted font-mono whitespace-nowrap">
+              {table.columns.map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
       <div className="flex-1 min-w-0 p-3.5 sm:p-4">
@@ -79,10 +84,10 @@ export function SqlConsole({ config }: { config: SupersetToolConfig }) {
           <button
             type="button"
             onClick={run}
-            disabled={!ready || loading}
+            disabled={!isReady || loading}
             className="min-h-9 rounded-full bg-accent text-accent-foreground px-4 py-1.5 text-[13px] font-semibold disabled:opacity-40 transition-all active:scale-95"
           >
-            {loading ? "Running…" : ready ? "Run" : "Loading engine…"}
+            {loading ? "Running…" : isReady ? "Run" : "Loading engine…"}
           </button>
           {result && (
             <button
