@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { LessonContent } from "@/lib/types";
 import type { DatasetKey } from "@/lib/duckdb";
 import { useLessonStore } from "@/lib/store";
@@ -15,6 +15,10 @@ import { ContinueBlock } from "@/components/blocks/ContinueBlock";
 function datasetKeyFor(lesson: LessonContent["lesson"]): DatasetKey {
   const hint = `${lesson.dataset ?? ""} ${lesson.toolDefaults?.database ?? ""}`.toLowerCase();
   return hint.includes("calmly") ? "calmly" : "viditation";
+}
+
+function blockDomId(lessonId: string, index: number) {
+  return `block-${lessonId}-${index}`;
 }
 
 export function LessonPlayer({ content }: { content: LessonContent }) {
@@ -32,6 +36,28 @@ export function LessonPlayer({ content }: { content: LessonContent }) {
 
   const progress = getProgress(lesson.id);
   const { revealedCount, answers, selectedOption } = progress;
+
+  // Auto-scroll: without this, answering a question or tapping Continue reveals
+  // new content below the fold with zero visible change on screen, which reads
+  // as "nothing happened" and is the main source of users feeling stuck.
+  const prevRevealedRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (revealedCount === 0) return;
+    if (prevRevealedRef.current === null) {
+      // First paint for this lesson: jump (no animation) to where the learner
+      // left off, instead of stranding a resumed session at the very top.
+      if (revealedCount > 1) {
+        document
+          .getElementById(blockDomId(lesson.id, revealedCount - 1))
+          ?.scrollIntoView({ behavior: "auto", block: "end" });
+      }
+    } else if (revealedCount > prevRevealedRef.current) {
+      document
+        .getElementById(blockDomId(lesson.id, prevRevealedRef.current))
+        ?.scrollIntoView({ behavior: "auto", block: "start" });
+    }
+    prevRevealedRef.current = revealedCount;
+  }, [lesson.id, revealedCount]);
 
   if (revealedCount === 0) {
     return <div className="text-muted text-sm">Loading lesson…</div>;
@@ -56,45 +82,60 @@ export function LessonPlayer({ content }: { content: LessonContent }) {
         </div>
       </div>
 
-      <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col gap-5 sm:gap-6">
         {visibleBlocks.map((block, i) => {
-          const key = `${lesson.id}-${i}`;
+          const domId = blockDomId(lesson.id, i);
+          const scrollMargin = { scrollMarginTop: "5.5rem" } as const;
           switch (block.type) {
             case "message":
               return (
-                <MessageBlock key={key} block={block} character={charactersById[block.character]} />
+                <div id={domId} key={domId} style={scrollMargin}>
+                  <MessageBlock block={block} character={charactersById[block.character]} />
+                </div>
               );
             case "artifact":
-              return <ArtifactBlock key={key} block={block} />;
+              return (
+                <div id={domId} key={domId} style={scrollMargin}>
+                  <ArtifactBlock block={block} />
+                </div>
+              );
             case "tool":
               return (
-                <ToolBlock
-                  key={key}
-                  block={block}
-                  toolDefaults={lesson.toolDefaults}
-                  datasetKey={datasetKey}
-                />
+                <div id={domId} key={domId} style={scrollMargin}>
+                  <ToolBlock block={block} toolDefaults={lesson.toolDefaults} datasetKey={datasetKey} />
+                </div>
               );
             case "question":
               return (
-                <QuestionBlock
-                  key={key}
-                  block={block}
-                  answer={getAnswer(lesson.id, block.id)}
-                  selectedId={selectedOption[block.id]}
-                  onSelect={(optionId) => selectOption(lesson.id, block.id, optionId)}
-                  onSubmit={() => {
-                    const optionId = selectedOption[block.id];
-                    const option = block.options.find((o) => o.id === optionId);
-                    if (option) submitAnswer(lesson, block.id, option);
-                  }}
-                />
+                <div id={domId} key={domId} style={scrollMargin}>
+                  <QuestionBlock
+                    block={block}
+                    answer={getAnswer(lesson.id, block.id)}
+                    selectedId={selectedOption[block.id]}
+                    onSelect={(optionId) => selectOption(lesson.id, block.id, optionId)}
+                    onSubmit={() => {
+                      const optionId = selectedOption[block.id];
+                      const option = block.options.find((o) => o.id === optionId);
+                      if (option) submitAnswer(lesson, block.id, option);
+                    }}
+                  />
+                </div>
               );
             case "feedback":
-              return <FeedbackBlock key={key} block={block} />;
+              return (
+                <div id={domId} key={domId} style={scrollMargin}>
+                  <FeedbackBlock block={block} />
+                </div>
+              );
             case "continue":
               return (
-                <ContinueBlock key={key} label={block.label} onClick={() => advance(lesson)} />
+                <div id={domId} key={domId} style={scrollMargin}>
+                  <ContinueBlock
+                    label={block.label}
+                    isCurrent={i === revealedCount - 1}
+                    onClick={() => advance(lesson, i)}
+                  />
+                </div>
               );
             default:
               return null;

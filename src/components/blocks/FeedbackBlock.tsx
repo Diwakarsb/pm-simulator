@@ -1,15 +1,13 @@
 import clsx from "clsx";
+import Link from "next/link";
 import { Prose } from "@/lib/markdown";
+import { MODULES } from "@/lib/modules";
 import type { FeedbackBlockNode } from "@/lib/types";
-
-const CROSS_SELL_LABELS: Record<string, string> = {
-  "product-planning": "Product Planning",
-  "sql-for-pms": "SQL for Product Managers",
-  "analytics-for-pms": "Analytics for Product Managers",
-};
 
 export function FeedbackBlock({ block }: { block: FeedbackBlockNode }) {
   const isWrong = block.verdict === "wrong";
+  const crossSellModule = block.crossSellModuleId ? MODULES[block.crossSellModuleId] : undefined;
+
   return (
     <div
       className={clsx(
@@ -33,10 +31,13 @@ export function FeedbackBlock({ block }: { block: FeedbackBlockNode }) {
         </span>
       </div>
       <Prose text={block.markdown} className="text-[14px] sm:text-[15px] text-foreground/90 leading-relaxed" />
-      {block.crossSellModuleId && (
-        <a href="#" className="mt-2 inline-block text-xs font-medium text-cross-sell hover:underline">
-          Learn more: {CROSS_SELL_LABELS[block.crossSellModuleId] ?? block.crossSellModuleId}
-        </a>
+      {crossSellModule && (
+        <Link
+          href={`/lesson/${crossSellModule.module.id}`}
+          className="mt-2 inline-block text-xs font-medium text-cross-sell hover:underline"
+        >
+          Learn more: {crossSellModule.module.title} →
+        </Link>
       )}
       <button type="button" className="mt-2 block text-xs text-muted hover:text-foreground transition-colors">
         I disagree

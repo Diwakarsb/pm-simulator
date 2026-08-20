@@ -28,7 +28,7 @@ interface LessonState {
   initLesson: (lesson: Lesson) => void;
   selectOption: (lessonId: string, questionBlockId: string, optionId: string) => void;
   submitAnswer: (lesson: Lesson, questionBlockId: string, option: Option) => void;
-  advance: (lesson: Lesson) => void;
+  advance: (lesson: Lesson, blockIndex: number) => void;
   getProgress: (lessonId: string) => LessonProgress;
   getAnswer: (lessonId: string, questionBlockId: string) => Answer | undefined;
   reset: (lessonId: string) => void;
@@ -97,8 +97,12 @@ export const useLessonStore = create<LessonState>()(
         }));
       },
 
-      advance: (lesson) => {
+      advance: (lesson, blockIndex) => {
         const p = get().progressByLesson[lesson.id] ?? EMPTY_PROGRESS;
+        // Guard against stale/duplicate clicks on a Continue button that's no
+        // longer the reveal frontier — without this, re-clicking an already-used
+        // button silently skips the next block instead of doing nothing.
+        if (blockIndex !== p.revealedCount - 1) return;
         const revealedCount = fillForward(lesson, p.revealedCount + 1, p.answers);
         const isLast = revealedCount >= lesson.blocks.length;
         set((s) => ({
