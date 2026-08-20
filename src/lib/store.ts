@@ -8,20 +8,30 @@ function isBlocking(block: Block, answered: (id: string) => boolean): boolean {
   return false;
 }
 
-interface LessonState {
-  lessonId: string | null;
+interface LessonProgress {
   revealedCount: number;
   answers: Answer[];
   completedAt: number | null;
   selectedOption: Record<string, string>; // questionBlockId -> optionId (pending, before submit)
+}
+
+const EMPTY_PROGRESS: LessonProgress = {
+  revealedCount: 0,
+  answers: [],
+  completedAt: null,
+  selectedOption: {},
+};
+
+interface LessonState {
+  progressByLesson: Record<string, LessonProgress>;
 
   initLesson: (lesson: Lesson) => void;
-  selectOption: (questionBlockId: string, optionId: string) => void;
+  selectOption: (lessonId: string, questionBlockId: string, optionId: string) => void;
   submitAnswer: (lesson: Lesson, questionBlockId: string, option: Option) => void;
-  advance: (lesson: Lesson) => void;
-  isAnswered: (questionBlockId: string) => boolean;
-  getAnswer: (questionBlockId: string) => Answer | undefined;
-  reset: () => void;
+  advance: (lesson: Lesson, blockIndex: number) => void;
+  getProgress: (lessonId: string) => LessonProgress;
+  getAnswer: (lessonId: string, questionBlockId: string) => Answer | undefined;
+  reset: (lessonId: string) => void;
 }
 
 function fillForward(lesson: Lesson, revealedCount: number, answers: Answer[]): number {
@@ -39,47 +49,81 @@ function fillForward(lesson: Lesson, revealedCount: number, answers: Answer[]): 
 export const useLessonStore = create<LessonState>()(
   persist(
     (set, get) => ({
-      lessonId: null,
-      revealedCount: 0,
-      answers: [],
-      completedAt: null,
-      selectedOption: {},
+      progressByLesson: {},
 
       initLesson: (lesson) => {
-        const state = get();
-        if (state.lessonId === lesson.id && state.revealedCount > 0) return; // resume
+        const existing = get().progressByLesson[lesson.id];
+        if (existing && existing.revealedCount > 0) return; // resume
         const revealedCount = fillForward(lesson, 0, []);
-        set({ lessonId: lesson.id, revealedCount, answers: [], completedAt: null, selectedOption: {} });
+        set((s) => ({
+          progressByLesson: {
+            ...s.progressByLesson,
+            [lesson.id]: { ...EMPTY_PROGRESS, revealedCount },
+          },
+        }));
       },
 
-      selectOption: (questionBlockId, optionId) => {
-        set((s) => ({ selectedOption: { ...s.selectedOption, [questionBlockId]: optionId } }));
+      selectOption: (lessonId, questionBlockId, optionId) => {
+        set((s) => {
+          const p = s.progressByLesson[lessonId] ?? EMPTY_PROGRESS;
+          return {
+            progressByLesson: {
+              ...s.progressByLesson,
+              [lessonId]: { ...p, selectedOption: { ...p.selectedOption, [questionBlockId]: optionId } },
+            },
+          };
+        });
       },
 
       submitAnswer: (lesson, questionBlockId, option) => {
-        const s = get();
-        if (s.answers.some((a) => a.questionBlockId === questionBlockId)) return;
+        const p = get().progressByLesson[lesson.id] ?? EMPTY_PROGRESS;
+        if (p.answers.some((a) => a.questionBlockId === questionBlockId)) return;
         const answers = [
-          ...s.answers,
+          ...p.answers,
           { questionBlockId, optionId: option.id, weight: option.weight, ts: Date.now() },
         ];
-        const revealedCount = fillForward(lesson, s.revealedCount, answers);
+        const revealedCount = fillForward(lesson, p.revealedCount, answers);
         const isLast = revealedCount >= lesson.blocks.length;
-        set({ answers, revealedCount, completedAt: isLast ? Date.now() : s.completedAt });
+        set((s) => ({
+          progressByLesson: {
+            ...s.progressByLesson,
+            [lesson.id]: {
+              ...p,
+              answers,
+              revealedCount,
+              completedAt: isLast ? Date.now() : p.completedAt,
+            },
+          },
+        }));
       },
 
-      advance: (lesson) => {
-        const s = get();
-        const revealedCount = fillForward(lesson, s.revealedCount + 1, s.answers);
+      advance: (lesson, blockIndex) => {
+        const p = get().progressByLesson[lesson.id] ?? EMPTY_PROGRESS;
+        // Guard against stale/duplicate clicks on a Continue button that's no
+        // longer the reveal frontier — without this, re-clicking an already-used
+        // button silently skips the next block instead of doing nothing.
+        if (blockIndex !== p.revealedCount - 1) return;
+        const revealedCount = fillForward(lesson, p.revealedCount + 1, p.answers);
         const isLast = revealedCount >= lesson.blocks.length;
-        set({ revealedCount, completedAt: isLast ? Date.now() : s.completedAt });
+        set((s) => ({
+          progressByLesson: {
+            ...s.progressByLesson,
+            [lesson.id]: { ...p, revealedCount, completedAt: isLast ? Date.now() : p.completedAt },
+          },
+        }));
       },
 
-      isAnswered: (questionBlockId) => get().answers.some((a) => a.questionBlockId === questionBlockId),
-      getAnswer: (questionBlockId) => get().answers.find((a) => a.questionBlockId === questionBlockId),
+      getProgress: (lessonId) => get().progressByLesson[lessonId] ?? EMPTY_PROGRESS,
+      getAnswer: (lessonId, questionBlockId) =>
+        (get().progressByLesson[lessonId] ?? EMPTY_PROGRESS).answers.find(
+          (a) => a.questionBlockId === questionBlockId
+        ),
 
-      reset: () => set({ lessonId: null, revealedCount: 0, answers: [], completedAt: null, selectedOption: {} }),
+      reset: (lessonId) =>
+        set((s) => ({
+          progressByLesson: { ...s.progressByLesson, [lessonId]: { ...EMPTY_PROGRESS } },
+        })),
     }),
-    { name: "pm-simulator-lesson-progress" }
+    { name: "pm-simulator-lesson-progress-v2" }
   )
 );

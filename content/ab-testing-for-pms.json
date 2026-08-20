@@ -1,0 +1,101 @@
+{
+  "module": {
+    "id": "ab-testing-for-pms",
+    "title": "A/B Testing for Product Managers",
+    "subtitle": "100+ EXERCISES / 40 HOURS OF PRACTICE",
+    "description": "You don't need to be a statistician to run good experiments — you need the principles. Read results, avoid the traps, decide ship/no-ship. Case: Calmly meditation app.",
+    "priceEUR": 459,
+    "isFree": false
+  },
+  "characters": [
+    { "id": "andrew", "name": "Diwakar Badiger", "role": "AI Product Manager", "avatarUrl": "/avatars/diwakar.jpg" },
+    { "id": "maya", "name": "Maya", "role": "Experimentation Lead" },
+    { "id": "leo", "name": "Leo", "role": "Growth PM" }
+  ],
+  "lesson": {
+    "id": "ab-testing-essentials",
+    "title": "Experiments: Ship, Kill, or Keep Running?",
+    "note": "Uses an ab-result widget (a small results table: variant, users, metric, uplift, p-value/CI, power). Fixture-driven from each tool block's config. Same grading model. The learning goal is interpretation and decision-making, not hand computation.",
+    "blocks": [
+      { "type": "message", "character": "maya", "markdown": "I run experimentation at **Calmly**. Experiments are the only way to know if a change *caused* an improvement. You don't need heavy stats — you need to read results correctly and not get fooled. Let's go." },
+      { "type": "continue", "label": "Let's experiment" },
+
+      { "type": "message", "character": "leo", "markdown": "We want a bigger 'Start free trial' button. Before we build anything — what makes a good **hypothesis** for this test?" },
+      { "type": "question", "id": "ab_q1", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "'A larger CTA will increase trial-start rate, because it's easier to notice' — a change, an expected metric move, and a reason", "weight": 1, "feedbackId": "ab_f1" },
+        { "id": "b", "label": "'Let's make the button bigger and see what happens'", "weight": 0, "feedbackId": "ab_f1" },
+        { "id": "c", "label": "'The button should be blue'", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ab_f1", "verdict": "correct", "markdown": "A hypothesis names the change, the **primary metric** it should move, and a rationale. 'See what happens' has no falsifiable prediction — you'll rationalize any result after the fact." },
+      { "type": "continue", "label": "Next" },
+
+      { "type": "message", "character": "maya", "markdown": "Here's the first readout. Primary metric = trial-start rate. Is this a ship?" },
+      { "type": "tool", "kind": "ab-result", "config": { "primaryMetric": "Trial-start rate", "variants": [ { "name": "Control", "users": 8000, "metric": "5.0%" }, { "name": "Variant (big CTA)", "users": 8000, "metric": "5.6%" } ], "relativeUplift": "+12%", "pValue": 0.01, "confidenceInterval": "+3% to +21%", "powered": true } },
+      { "type": "question", "id": "ab_q2", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Ship — +12% uplift, p=0.01, CI excludes 0, and the test was powered", "weight": 1, "feedbackId": "ab_f2" },
+        { "id": "b", "label": "Don't ship — 5.6% vs 5.0% is basically the same", "weight": 0, "feedbackId": "ab_f2" },
+        { "id": "c", "label": "Run it 3 more months to be sure", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ab_f2", "verdict": "correct", "markdown": "Clean win: statistically significant (p=0.01), the confidence interval is entirely positive (+3% to +21%), and the test was adequately powered. When all three line up, ship." },
+      { "type": "continue", "label": "Ship it" },
+
+      { "type": "message", "character": "maya", "markdown": "Next readout. Same button, different week. Ship?" },
+      { "type": "tool", "kind": "ab-result", "config": { "primaryMetric": "Trial-start rate", "variants": [ { "name": "Control", "users": 900, "metric": "5.0%" }, { "name": "Variant", "users": 900, "metric": "6.4%" } ], "relativeUplift": "+28%", "pValue": 0.21, "confidenceInterval": "-6% to +62%", "powered": false } },
+      { "type": "question", "id": "ab_q3", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Not yet — p=0.21 and the CI includes 0; the sample is too small (underpowered)", "weight": 1, "feedbackId": "ab_f3" },
+        { "id": "b", "label": "Ship — +28% is even bigger than last time!", "weight": 0, "feedbackId": "ab_f3" },
+        { "id": "c", "label": "Ship the control, it's safer", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ab_f3", "verdict": "correct", "markdown": "A big point-estimate on a tiny sample is a mirage. p=0.21 means this could easily be noise, and the CI spans negative to +62% — you genuinely don't know the sign. Underpowered tests produce large, unstable effects. Collect more data before deciding." },
+      { "type": "continue", "label": "Don't chase noise" },
+
+      { "type": "message", "character": "leo", "markdown": "Impatient stakeholder: 'It hit p<0.05 on day 2! Let's stop the test and ship.' Why is stopping the moment you see significance a problem?" },
+      { "type": "question", "id": "ab_q4", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Peeking / early stopping inflates false positives — significance can appear by chance then vanish; decide at the pre-set sample size", "weight": 1, "feedbackId": "ab_f4" },
+        { "id": "b", "label": "No problem — p<0.05 is p<0.05 whenever it happens", "weight": 0, "feedbackId": "ab_f4" },
+        { "id": "c", "label": "Day 2 is unlucky, wait for day 3 then stop", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ab_f4", "verdict": "correct", "markdown": "'Peeking' and stopping at the first significant blip massively inflates the false-positive rate. Fix the sample size (or use a sequential-testing method designed for it) up front, and read the result at the end." },
+      { "type": "continue", "label": "No peeking" },
+
+      { "type": "message", "character": "maya", "markdown": "This variant increased trial-starts (+10%, significant) but 30-day **paid retention dropped** 8%. What does this tell you about metric choice?" },
+      { "type": "tool", "kind": "ab-result", "config": { "primaryMetric": "Trial-start rate", "guardrailMetric": "30-day paid retention", "variants": [ { "name": "Control", "users": 8000, "metric": "5.0% start / 40% retain" }, { "name": "Variant", "users": 8000, "metric": "5.5% start / 36.8% retain" } ], "relativeUplift": "+10% start / -8% retention", "pValue": 0.02, "powered": true } },
+      { "type": "question", "id": "ab_q5", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "The change attracted lower-intent trials — guardrail metrics matter; a primary win with a retention loss may be net-negative", "weight": 1, "feedbackId": "ab_f5" },
+        { "id": "b", "label": "Ship — the primary metric won, retention is irrelevant", "weight": 0, "feedbackId": "ab_f5" },
+        { "id": "c", "label": "Retention always drops, ignore it", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ab_f5", "verdict": "correct", "markdown": "Optimizing one metric can harm another. Always define **guardrail metrics** (retention, revenue, complaints). A cheaper trigger that pulls in users who churn fast can lose money despite a shiny top-line win." },
+      { "type": "continue", "label": "Guardrails on" },
+
+      { "type": "message", "character": "maya", "markdown": "Someone ran ONE test but measured 20 different metrics, and reports 'we found a significant effect on scroll-depth (p=0.04)!' Why be skeptical?" },
+      { "type": "question", "id": "ab_q6", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Multiple comparisons — test 20 metrics at p<0.05 and ~1 will look significant by pure chance; wasn't the pre-declared primary metric", "weight": 1, "feedbackId": "ab_f6" },
+        { "id": "b", "label": "Scroll-depth is a great primary metric", "weight": 0, "feedbackId": "ab_f6" },
+        { "id": "c", "label": "p=0.04 is always trustworthy", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ab_f6", "verdict": "correct", "markdown": "With 20 metrics at 5%, you expect ~1 false positive by chance. Cherry-picking the one that 'worked' is p-hacking. Declare a single primary metric before the test; treat everything else as exploratory." },
+      { "type": "continue", "label": "Pre-register" },
+
+      { "type": "message", "character": "leo", "markdown": "A test comes back **flat** — no significant difference, and it was well-powered. The team is deflated. What's the right framing?" },
+      { "type": "question", "id": "ab_q7", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "A trustworthy null result is valuable — it saved us shipping something that doesn't help; keep control and move on", "weight": 1, "feedbackId": "ab_f7" },
+        { "id": "b", "label": "Ship the variant anyway, we built it", "weight": 0, "feedbackId": "ab_f7" },
+        { "id": "c", "label": "Keep running until it turns significant", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ab_f7", "verdict": "correct", "markdown": "Most experiments don't win — that's normal and useful. A powered null tells you not to invest further. Shipping anyway ('we built it' — the sunk-cost trap) or running until noise crosses the line both defeat the purpose." },
+      { "type": "continue", "label": "Nulls are wins too" },
+
+      { "type": "message", "character": "maya", "markdown": "Final: results are strong, but you notice **80% of traffic went to Variant and 20% to Control** (misconfigured split), and Variant skews to iOS users. Trust it?" },
+      { "type": "question", "id": "ab_q8", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "No — a broken split / sample-ratio mismatch suggests biased assignment; re-run with a correct 50/50 randomization", "weight": 1, "feedbackId": "ab_f8" },
+        { "id": "b", "label": "Yes — more users in Variant means more confidence", "weight": 0, "feedbackId": "ab_f8" },
+        { "id": "c", "label": "Yes — iOS users are the important ones", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "ab_f8", "verdict": "correct", "markdown": "A **sample-ratio mismatch** (getting 80/20 when you expected 50/50) means randomization is broken — the groups aren't comparable, so any 'result' is confounded (here, by platform). Fix the assignment and re-run; don't trust a compromised experiment.", "crossSellModuleId": "ab-testing-for-pms" },
+      { "type": "continue", "label": "Integrity first" },
+
+      { "type": "message", "character": "andrew", "markdown": "Strong work. You can write a real hypothesis, read significance + confidence intervals + power together, resist peeking and p-hacking, respect guardrails, value null results, and catch a broken experiment. That's experiment literacy — the thing that lets a PM out-argue anyone with data." }
+    ]
+  }
+}

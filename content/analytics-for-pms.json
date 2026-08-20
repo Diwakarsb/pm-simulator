@@ -1,0 +1,110 @@
+{
+  "module": {
+    "id": "analytics-for-pms",
+    "title": "Analytics for Product Managers",
+    "subtitle": "60+ EXERCISES / 8 HOURS OF PRACTICE",
+    "description": "Decide with data using a product-analytics system (Mixpanel-style). Insights, funnels, retention, segmentation. Case: Calmly meditation app + an online shop.",
+    "priceEUR": 329,
+    "isFree": false
+  },
+  "characters": [
+    { "id": "andrew", "name": "Diwakar Badiger", "role": "AI Product Manager", "avatarUrl": "/avatars/diwakar.jpg" },
+    { "id": "priya", "name": "Priya", "role": "Product Analyst" },
+    { "id": "leo", "name": "Leo", "role": "Growth PM" }
+  ],
+  "lesson": {
+    "id": "analytics-essentials",
+    "title": "Reading Product Analytics Without Fooling Yourself",
+    "note": "Uses the mock analytics widgets: mixpanel-insights (chart+table+grouping toggle), mixpanel-funnel (steps), mixpanel-retention (cohort grid). All fixture-driven from each tool block's config. Same grading model.",
+    "blocks": [
+      { "type": "message", "character": "priya", "markdown": "Hi! I'm the product analyst on **Calmly**. Behavioral analytics stores *everything* users do — screen views, taps, session starts. The skill isn't the tool, it's asking the right question and not fooling yourself. Let's practice." },
+      { "type": "continue", "label": "Let's dig in" },
+
+      { "type": "message", "character": "priya", "markdown": "Here's an Insights report: daily **Session Start** events for one week. Leadership asks 'how many sessions did we have Tuesday?' Read the chart." },
+      { "type": "tool", "kind": "mixpanel-insights", "config": { "metric": "Session Start (total events)", "grouping": "day", "series": [ { "label": "Mon", "value": 1420 }, { "label": "Tue", "value": 1610 }, { "label": "Wed", "value": 1555 }, { "label": "Thu", "value": 1490 }, { "label": "Fri", "value": 1380 }, { "label": "Sat", "value": 2050 }, { "label": "Sun", "value": 1990 } ] } },
+      { "type": "question", "id": "an_q1", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "1,610 sessions", "weight": 1, "feedbackId": "an_f1" },
+        { "id": "b", "label": "1,555 sessions", "weight": 0, "feedbackId": null },
+        { "id": "c", "label": "2,050 sessions", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "an_f1", "verdict": "correct", "markdown": "1,610. Simple, but notice weekends spike — meditation happens more on days off. Always eyeball the shape, not just the one number you were asked for." },
+      { "type": "continue", "label": "Next" },
+
+      { "type": "message", "character": "priya", "markdown": "Same event, two ways to count it: **Total events** vs **Uniques**. This week Total = 11,495 but Uniques = 3,240. What does the gap tell you?" },
+      { "type": "question", "id": "an_q2", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Users come back — on average ~3.5 sessions per unique user this week", "weight": 1, "feedbackId": "an_f2" },
+        { "id": "b", "label": "Something's broken — Total should equal Uniques", "weight": 0, "feedbackId": "an_f2" },
+        { "id": "c", "label": "We had 11,495 different users", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "an_f2", "verdict": "correct", "markdown": "Total counts every event; Uniques counts distinct users. 11,495 / 3,240 ≈ 3.5 sessions per user. Confusing these two is the #1 analytics mistake — 'how many people' vs 'how many times' are different questions." },
+      { "type": "continue", "label": "Crucial" },
+
+      { "type": "message", "character": "leo", "markdown": "We ship a new onboarding. Here's the activation **funnel**: Install → Sign up → First meditation → Set a reminder. Which step is the biggest leak to fix first?" },
+      { "type": "tool", "kind": "mixpanel-funnel", "config": { "steps": [ { "name": "Install", "count": 10000, "stepConversionFromPrev": null }, { "name": "Sign up", "count": 6200, "stepConversionFromPrev": 62.0 }, { "name": "First meditation", "count": 2790, "stepConversionFromPrev": 45.0 }, { "name": "Set a reminder", "count": 2400, "stepConversionFromPrev": 86.0 } ], "overallConversion": 24.0 } },
+      { "type": "question", "id": "an_q3", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Sign up → First meditation (45% — the steepest drop)", "weight": 1, "feedbackId": "an_f3" },
+        { "id": "b", "label": "Install → Sign up (it's the first step)", "weight": 0, "feedbackId": null },
+        { "id": "c", "label": "Set a reminder (it's the last step)", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "an_f3", "verdict": "correct", "markdown": "Biggest leak = biggest opportunity: only 45% who sign up reach their first meditation. That's the 'aha moment' gap. Fix the steepest drop, not the first or last step by default." },
+      { "type": "continue", "label": "Next" },
+
+      { "type": "message", "character": "leo", "markdown": "Careful though — before we celebrate fixing that step, what should you check about this funnel's **time window and order**?" },
+      { "type": "question", "id": "an_q4", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "The conversion window (e.g. 7 days) and whether steps must happen in order — both change the numbers a lot", "weight": 1, "feedbackId": "an_f4" },
+        { "id": "b", "label": "Nothing — a funnel is a funnel", "weight": 0, "feedbackId": "an_f4" },
+        { "id": "c", "label": "Only the total install count matters", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "an_f4", "verdict": "correct", "markdown": "A funnel's numbers depend on its **conversion window** (a 1-hour vs 7-day window gives very different rates) and whether it's ordered/any-order. Always state the window when you report a funnel." },
+      { "type": "continue", "label": "Good catch" },
+
+      { "type": "message", "character": "priya", "markdown": "Here's a **retention** cohort grid (Week 0 = signup week, then % returning in later weeks). Two cohorts: before and after the onboarding change. What's the honest read?" },
+      { "type": "tool", "kind": "mixpanel-retention", "config": { "unit": "week", "cohorts": [ { "label": "Jan (before)", "size": 1200, "retention": [100, 34, 22, 18, 15] }, { "label": "Feb (after)", "size": 1300, "retention": [100, 41, 29, 25, 23] } ] } },
+      { "type": "question", "id": "an_q5", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "The Feb cohort retains meaningfully better at every week — the change likely helped", "weight": 1, "feedbackId": "an_f5" },
+        { "id": "b", "label": "No difference — both start at 100%", "weight": 0, "feedbackId": "an_f5" },
+        { "id": "c", "label": "Jan is better because it has fewer users", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "an_f5", "verdict": "correct", "markdown": "Everyone starts at 100% by definition — read the *later* weeks. Feb holds ~23% at week 4 vs Jan's ~15%, and it's higher at every step. Retention curves are the truest measure of product-market fit; a lift that persists is real signal." },
+      { "type": "continue", "label": "Encouraging" },
+
+      { "type": "message", "character": "priya", "markdown": "A stakeholder says 'DAU is up 20% this week, the new feature is working!' The feature launched the same week we ran a big paid-install campaign. What's the risk in that claim?" },
+      { "type": "question", "id": "an_q6", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Correlation ≠ causation — the campaign could explain the DAU lift, not the feature", "weight": 1, "feedbackId": "an_f6" },
+        { "id": "b", "label": "No risk, DAU is up so the feature works", "weight": 0, "feedbackId": "an_f6" },
+        { "id": "c", "label": "DAU is a vanity metric so ignore it entirely", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "an_f6", "verdict": "correct", "markdown": "Two things changed at once, so you can't attribute the lift to the feature. To isolate it you'd need an A/B test or at least segment new-campaign users out. Confounding is everywhere in observational analytics.", "crossSellModuleId": "ab-testing-for-pms" },
+      { "type": "continue", "label": "Right" },
+
+      { "type": "message", "character": "leo", "markdown": "Switching products: our **online shop**. Insights shows 'Add to Cart' up 15% but 'Purchase' flat. Segment tells you most of the cart lift comes from one country where a coupon leaked. What's the takeaway?" },
+      { "type": "question", "id": "an_q7", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Segment before concluding — an aggregate up-trend can hide a localized, non-repeatable cause", "weight": 1, "feedbackId": "an_f7" },
+        { "id": "b", "label": "Carts are up, so purchases will follow — ship more coupons", "weight": 0, "feedbackId": "an_f7" },
+        { "id": "c", "label": "Purchase is flat so the shop is dead", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "an_f7", "verdict": "correct", "markdown": "Aggregate metrics lie by averaging. **Breakdown/segmentation** (by country, platform, cohort) reveals whether a trend is broad or driven by one slice. And carts-up-purchases-flat means the leak is downstream — check checkout." },
+      { "type": "continue", "label": "Segment first" },
+
+      { "type": "message", "character": "priya", "markdown": "You need a **North Star** for Calmly. Which candidate best captures delivered value (not vanity)?" },
+      { "type": "question", "id": "an_q8", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Weekly users who complete ≥3 meditations", "weight": 1, "feedbackId": "an_f8" },
+        { "id": "b", "label": "Total app downloads", "weight": 0, "feedbackId": "an_f8" },
+        { "id": "c", "label": "Number of screens viewed", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "an_f8", "verdict": "correct", "markdown": "A good North Star ties to *value users actually get* and predicts retention/revenue. 'Weekly users completing ≥3 meditations' captures habit formation. Downloads and screen-views are vanity — they can rise while the product fails." },
+      { "type": "continue", "label": "Love it" },
+
+      { "type": "message", "character": "priya", "markdown": "Last one. Your event tracking shows 'Purchase' fired but 'Add to Cart' didn't for 8% of buyers — impossible in the UI. Before analyzing conversion, what do you do?" },
+      { "type": "question", "id": "an_q9", "sendLabel": "Send", "options": [
+        { "id": "a", "label": "Audit the tracking/instrumentation — bad event data makes every downstream metric wrong", "weight": 1, "feedbackId": "an_f9" },
+        { "id": "b", "label": "Ignore it, 8% is small", "weight": 0, "feedbackId": "an_f9" },
+        { "id": "c", "label": "Assume users are cheating the cart", "weight": 0, "feedbackId": null }
+      ]},
+      { "type": "feedback", "id": "an_f9", "verdict": "correct", "markdown": "Garbage in, garbage out. Impossible event orders signal a tracking bug (mis-fired or missing events). Data quality is a PM responsibility — validate instrumentation before trusting funnels built on it." },
+      { "type": "continue", "label": "Instrumentation matters" },
+
+      { "type": "message", "character": "andrew", "markdown": "Excellent. You can now separate total vs unique, read funnels and retention honestly, resist correlation-causation traps, segment before concluding, pick a real North Star, and question the data itself. That's data-driven product management." }
+    ]
+  }
+}

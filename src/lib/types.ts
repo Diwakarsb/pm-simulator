@@ -34,13 +34,14 @@ export interface ArtifactBlock {
 }
 
 export interface SupersetToolConfig {
-  database: string;
-  schema: string;
-  table: string;
+  database?: string;
+  schema?: string;
+  table?: string;
   defaultQuery: string;
 }
 
-export interface MixpanelInsightsConfig {
+// Legacy shape (base tryout lesson): a week/month toggle over two fixed series.
+export interface MixpanelInsightsToggleConfig {
   metric: string;
   grouping: "week" | "month";
   weekly: { label: string; value: number }[];
@@ -48,16 +49,73 @@ export interface MixpanelInsightsConfig {
   monthlyUnique: number;
 }
 
+// General shape: a single labeled series, no toggle.
+export interface MixpanelInsightsSeriesConfig {
+  metric: string;
+  grouping: string;
+  series: { label: string; value: number }[];
+  average?: number;
+}
+
+export type MixpanelInsightsConfig = MixpanelInsightsToggleConfig | MixpanelInsightsSeriesConfig;
+
 export interface MixpanelFunnelConfig {
   steps: { name: string; count: number; stepConversionFromPrev: number | null }[];
   overallConversion: number;
 }
 
+export interface MixpanelRetentionConfig {
+  unit: string;
+  cohorts: { label: string; size: number; retention: number[] }[];
+}
+
+export interface AbResultConfig {
+  primaryMetric: string;
+  guardrailMetric?: string;
+  variants: { name: string; users: number; metric: string }[];
+  relativeUplift: string;
+  pValue?: number;
+  confidenceInterval?: string;
+  powered?: boolean;
+}
+
+export interface EconGridCell {
+  label: string;
+  value?: number;
+  unit?: string;
+  given?: boolean;
+  computed?: boolean;
+  formula?: string;
+  note?: string;
+}
+
+export interface EconGridConfig {
+  cells: EconGridCell[];
+}
+
+export type ToolConfig =
+  | SupersetToolConfig
+  | MixpanelInsightsConfig
+  | MixpanelFunnelConfig
+  | MixpanelRetentionConfig
+  | AbResultConfig
+  | EconGridConfig
+  | Record<string, unknown>;
+
 export interface ToolBlock {
   type: "tool";
-  kind: "superset" | "mixpanel-insights" | "mixpanel-funnel" | "api" | "sheet";
-  collapsedLabel: string;
-  config: SupersetToolConfig | MixpanelInsightsConfig | MixpanelFunnelConfig | Record<string, unknown>;
+  kind:
+    | "superset"
+    | "sql"
+    | "mixpanel-insights"
+    | "mixpanel-funnel"
+    | "mixpanel-retention"
+    | "ab-result"
+    | "econ-grid"
+    | "api"
+    | "sheet";
+  collapsedLabel?: string;
+  config: ToolConfig;
 }
 
 export interface QuestionBlock {
@@ -89,10 +147,20 @@ export type Block =
   | FeedbackBlockNode
   | ContinueBlock;
 
+export interface ToolDefaults {
+  kind?: string;
+  database?: string;
+  schema?: string;
+  collapsedLabel?: string;
+}
+
 export interface Lesson {
   id: string;
   moduleId?: string;
   title: string;
+  toolDefaults?: ToolDefaults;
+  dataset?: string;
+  note?: string;
   blocks: Block[];
 }
 
@@ -102,6 +170,7 @@ export interface LessonContent {
     title: string;
     subtitle?: string;
     description?: string;
+    priceEUR?: number;
     isFree?: boolean;
   };
   characters: Character[];
